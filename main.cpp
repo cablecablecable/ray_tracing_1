@@ -3,8 +3,21 @@
 #include "color.h"
 #include "ray.h"
 
+bool hit_sphere(const point3& center, double radius, const ray& r)
+{
+    vec3 oc = center - r.origin();
+    auto a = dot(r.direction(), r.direction());
+    auto b = -2.0 * dot(r.direction(), oc);
+    auto c = dot(oc, oc) - radius*radius;
+    auto discriminant = b*b - 4*a*c;
+    return (discriminant >= 0);
+}
+
 color ray_color(const ray& r)
 {
+    if (hit_sphere(point3(0,0,-1), 0.5, r))
+        return color(1, 0, 0);
+
     vec3 unit_direction = unit_vector(r.direction());
     double a = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
@@ -53,7 +66,7 @@ int main()
     {
         std::clog << "\rScanlines remaining: " << (image_height - 1) << " " << std::flush;
 
-        for (int i = 0; i < image_width; i++)
+            for (int i = 0; i < image_width; i++)
         {
             vec3 pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
             vec3 ray_direction = pixel_center - camera_center;
